@@ -3,6 +3,7 @@ state("Devolverland_Expo-Win64-Shipping")
     float xPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D0;
     float yPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D4;
     float zPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D8;
+
 }
 
 start
@@ -26,9 +27,9 @@ split
 {
     if(current.yPos < -14000.0f && current.yPos > -14500.0f)
     {
-        if(current.zPos > 200.0f && current.zPos > 600.0f)
+        if(current.zPos > 200.0f && current.zPos < 600.0f)
         {
-            if(current.xPos > -94000.0f && current.xPos < -93300.0f)
+            if(current.xPos > -94000.0f && current.xPos < -93400.0f)
                 return true;
         }
     }
