@@ -1,10 +1,44 @@
-state("Devolverland_Expo-Win64-Shipping")
+state("Devolverland_Expo-Win64-Shipping", "Release Version")
 {
     float xPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D0;
     float yPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D4;
     float zPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D8;
-
 }
+
+state("Devolverland_Expo-Win64-Shipping", "Patch 1")
+{
+    float xPos : 0x03BD5830, 0x30, 0x250, 0x290, 0x1D0;
+    float yPos : 0x03BD5830, 0x30, 0x250, 0x290, 0x1D4;
+    float zPos : 0x03BD5830, 0x30, 0x250, 0x290, 0x1D8;
+}
+
+
+init
+{
+	int moduleSize = modules.First().ModuleMemorySize;
+	print("[DEVOLVERLAND ASL] Main Module Size: "+moduleSize.ToString());
+	if (moduleSize == 67051520)
+	{
+		version = "Release Version";
+	} 
+	else if (moduleSize == 67055616)
+	{
+		version = "Patch 1";
+	}
+	else
+	{
+		version = "Unsupported: " + moduleSize.ToString();
+		MessageBox.Show("This game version is currently not supported.", "LiveSplit Auto Splitter - Unsupported Game Version");
+	}
+}
+
+update
+{
+	//Disable the script if the version is unknown
+	if (version.Contains("Unsupported"))
+		return false;
+}
+
 
 
 start
