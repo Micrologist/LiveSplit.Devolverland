@@ -6,6 +6,7 @@ state("Devolverland_Expo-Win64-Shipping")
 
 }
 
+
 start
 {
     if(current.xPos == 0)
@@ -19,7 +20,10 @@ start
         double curY = Math.Floor(current.yPos);
         double curZ = Math.Floor(current.zPos);
         if(curX != oldX || curY != oldY || curZ != oldZ)
+        {
+            vars.split = false;
             return true;
+        }
     }
 }
 
@@ -30,10 +34,18 @@ split
         if(current.zPos > 200.0f && current.zPos < 600.0f)
         {
             if(current.xPos > -94000.0f && current.xPos < -93400.0f)
-                return true;
+            {
+                vars.split = true;
+            }
         }
     }
+    if(vars.split && current.xPos == old.xPos)
+    {
+        vars.split = false;
+        return true;
+    }
 }
+
 
 reset
 {
