@@ -130,7 +130,7 @@ start
 
     if(vars.startIfStopped)
     {
-        if(current.playerTime != old.playerTime)
+        if(current.playerTime != old.playerTime || current.playerTime < 2.0f)
         {
             vars.startTime = System.DateTime.Now + TimeSpan.FromSeconds(0.1f);
         } 
