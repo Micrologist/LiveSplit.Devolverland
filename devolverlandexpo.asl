@@ -4,6 +4,8 @@ state("Devolverland_Expo-Win64-Shipping", "Release Version")
     float yPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D4;
     float zPos : 0x03BD5430, 0x30, 0x250, 0x290, 0x1D8;
 
+    float playerTime : 0x03BD5430, 0x30, 0x250, 0x288, 0xA0, 0x114;
+
     byte carrionCheck : 0x03BE30A0, 0x48, 0xA0, 0x2B8, 0x1C;
     byte carrionPlaying : 0x03BE30A0, 0x48, 0xA0, 0x2B8, 0x2B4;
 
@@ -32,6 +34,8 @@ state("Devolverland_Expo-Win64-Shipping", "Patch 1")
     float yPos : 0x03BD5830, 0x30, 0x250, 0x290, 0x1D4;
     float zPos : 0x03BD5830, 0x30, 0x250, 0x290, 0x1D8;
 
+    float playerTime : 0x03BD5830, 0x30, 0x250, 0x288, 0xA0, 0x114;
+
     byte carrionCheck : 0x03BE34A0, 0x48, 0xA0, 0x2B8, 0x1C;
     byte carrionPlaying : 0x03BE34A0, 0x48, 0xA0, 0x2B8, 0x2B4;
 
@@ -58,6 +62,9 @@ startup
 {
     vars.splitOnStop = false;
     vars.doneSplits = new List<String>();
+    vars.startTime = System.DateTime.Now;
+    vars.startIfStopped = false;
+    vars.setGameTime = true;
 
     settings.Add("split", false, "Split on watching trailers");
 	settings.Add("carrion", true, "Carrion Trailer", "split");
@@ -67,6 +74,22 @@ startup
 	settings.Add("sam", true, "Serious Sam Trailer", "split");
 	settings.Add("falls", true, "Fall Guys Trailer", "split");
 	settings.Add("shadow", true, "Shadow Warrior Trailer", "split");
+
+    if (timer.CurrentTimingMethod == TimingMethod.RealTime)
+	{        
+		var timingMessage = MessageBox.Show (
+			"This script relies on setting the comparison to \"Game Time\" for accurate time keeping.\n"+
+			"LiveSplit is currently set to show Real Time (RTA).\n"+
+			"Would you like to set the timing method to Game Time?",
+			"LiveSplit | Devolverland Expo",
+			MessageBoxButtons.YesNo,MessageBoxIcon.Question
+		);
+		
+		if (timingMessage == DialogResult.Yes)
+		{
+			timer.CurrentTimingMethod = TimingMethod.GameTime;
+		}
+	}
 }
 
 init
@@ -99,20 +122,35 @@ start
 {
     if(current.xPos == 0)
         return false;
-    double oldX = Math.Floor(old.xPos);
-    double oldY = Math.Floor(old.yPos);
-    double oldZ = Math.Floor(old.zPos);
-    if(oldX == -50023.0 && oldY == -7076.0 && oldZ == 746.0)
+    
+    if(!vars.startIfStopped && Math.Floor(current.xPos) == -50023.0 && Math.Floor(current.yPos) == -7076.0 && Math.Floor(current.zPos) == 746.0)
     {
-        double curX = Math.Floor(current.xPos);
-        double curY = Math.Floor(current.yPos);
-        double curZ = Math.Floor(current.zPos);
-        if(curX != oldX || curY != oldY || curZ != oldZ)
+        vars.startIfStopped = true;
+    }
+
+    if(vars.startIfStopped)
+    {
+        if(current.playerTime != old.playerTime)
         {
+            vars.startTime = System.DateTime.Now + TimeSpan.FromSeconds(0.1f);
+        } 
+        else if (System.DateTime.Now >= vars.startTime)
+        {
+            vars.startIfStopped = false;
             vars.splitOnStop = false;
             vars.doneSplits = new List<String>();
+            vars.setGameTime = true;
             return true;
         }
+    }
+}
+
+gameTime
+{
+    if(vars.setGameTime)
+    {
+        vars.setGameTime = false;
+        return TimeSpan.FromSeconds(0.15f);
     }
 }
 
@@ -183,6 +221,6 @@ reset
     double curX = Math.Floor(current.xPos);
     double curY = Math.Floor(current.yPos);
     double curZ = Math.Floor(current.zPos);
-    if(curX == -50023.0 && curY == -7076.0 && curZ == 746.0)
+    if(curX == -50023.0 && curY == -7076.0 && curZ == 746.0 && current.playerTime < 3.0f)
         return true;
 }
